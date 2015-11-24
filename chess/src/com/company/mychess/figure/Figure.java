@@ -11,6 +11,7 @@ public abstract class Figure implements Move {
     protected int y;//текущее положение фигуры
     protected FigureType figureType;//черные или белые
     protected boolean isInitPosition = true;//флаг, начальная ли позиция у фигуры или ей уже походили. Нужен пешкам или для рокировки
+    protected boolean isKilled = false;//флаг, ставим в true после того как фигуру съедят
 
     //Конструктор, который обязаны выполнить все наследники. Без начальной позиции и цвета шахматная фигура не имеет смысла
     public Figure(int x, int y, FigureType figureType) {
@@ -30,5 +31,17 @@ public abstract class Figure implements Move {
 
     public FigureType getFigureType() {
         return figureType;
+    }
+
+    public boolean isInitPosition() {
+        return isInitPosition;
+    }
+
+    public boolean isKilled() {
+        return isKilled;
+    }
+
+    public void setIsKilled(boolean isKilled) {
+        this.isKilled = isKilled;
     }
 }
