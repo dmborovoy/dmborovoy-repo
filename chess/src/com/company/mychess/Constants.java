@@ -5,5 +5,5 @@ package com.company.mychess;
  */
 public interface Constants {
 
-    String ILLEGAL_MOVE_MSG = "Illegal move";
+   final public String ILLEGAL_MOVE_MSG = "Illegal move";
 }

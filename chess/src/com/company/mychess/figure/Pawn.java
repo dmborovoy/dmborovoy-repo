@@ -8,7 +8,7 @@ import com.company.mychess.Move;
  * Created by teacher on 23.11.2015.
  * Пешка
  */
-public class Pawn extends Figure implements Move {
+final public class Pawn extends Figure implements Move {
 
     public Pawn(int x, int y, FigureType type) {
         super(x, y, type);
