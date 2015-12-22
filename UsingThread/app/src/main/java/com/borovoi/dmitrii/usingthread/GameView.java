@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -16,23 +17,30 @@ public class GameView extends SurfaceView implements Runnable {
     SurfaceHolder holder;
     Thread t;
     boolean drawing = true;
+    boolean dragging;
     Paint p;
+    Paint p1;
 
     // Экран
     int width, height;
 
     //    Bitmap ball;
+    // Круг
+    float x, y;
     float r = 100;
     float bX, bY;
-    float vX = 20, vY = 30;
+    float vX = 20, vY = 15;
 
     public GameView(Context context) {
         super(context);
         holder = getHolder();
         p = new Paint();
+        p1 = new Paint();
         p.setColor(Color.YELLOW);
+        p1.setColor(Color.GREEN);
         p.setStyle(Paint.Style.FILL);
         bX = bY = 200;
+        x = y = 100;
     }
 
 
@@ -71,6 +79,7 @@ public class GameView extends SurfaceView implements Runnable {
     private void paint(Canvas canvas) {
         canvas.drawARGB(250, 127, 199, 255); // заливаем цветом
         canvas.drawCircle(bX, bY, r, p);
+        canvas.drawCircle(x, y, r, p);
     }
 
     private void update() {
@@ -92,5 +101,33 @@ public class GameView extends SurfaceView implements Runnable {
             bY = height - r;
             vY = -vY;
         }
+    }
+
+    private boolean insideCircle (int eventX, int eventY) {
+        return Math.sqrt(Math.pow(x - eventX,2) + Math.pow(y - eventY,2)) < r;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+
+        switch (event.getAction()) {
+
+            case MotionEvent.ACTION_DOWN:
+                if (insideCircle((int)event.getX(), (int)event.getY())) {
+                    dragging = true;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (dragging) {
+                    x = event.getX();
+                    y = event.getY();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                dragging = false;
+                break;
+        }
+        return true;
     }
 }
