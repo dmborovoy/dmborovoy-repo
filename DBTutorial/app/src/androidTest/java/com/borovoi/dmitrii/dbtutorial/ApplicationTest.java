@@ -8,6 +8,7 @@ import android.util.Log;
 import com.borovoi.dmitrii.dbtutorial.model.CreditCard;
 import com.borovoi.dmitrii.dbtutorial.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,8 +29,6 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         dbHelper = new DBHelperV2(context);
         assertNotNull(dbHelper);
         dbHelper.init();
-//        SQLiteDatabase db = dbHelper.getWritableDatabase();
-//        assertNotNull(db);
     }
 
     @Override
@@ -51,12 +50,19 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
     }
 
     public void testGetCardsForUser(){
-        List<CreditCard> creditCardsByUserId = dbHelper.findAllCreditCardsByUserId(1L);
-        assertEquals(4, creditCardsByUserId.size());
+        List<CreditCard> creditCards = dbHelper.findAllCreditCardsByUserId(1L);
+        assertEquals(4, creditCards.size());
     }
 
     public void testGetUserForCreditCard(){
         User user = dbHelper.findUserForCreditCard(3L);
         assertEquals("user1", user.getName());
+    }
+
+    public void testGetUserForGroup(){
+        List<User> users = dbHelper.findAllUserForGroup(2L);
+        assertEquals(2, users.size());
+        Log.i(TAG, String.valueOf(users.get(0)));
+        Log.i(TAG, String.valueOf(users.get(1)));
     }
 }

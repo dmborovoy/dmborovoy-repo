@@ -47,7 +47,6 @@ public class DBHelperV1 extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-//        init();
     }
 
     @Override

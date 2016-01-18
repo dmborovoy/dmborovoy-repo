@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.borovoi.dmitrii.dbtutorial.model.CreditCard;
+import com.borovoi.dmitrii.dbtutorial.model.Group;
 import com.borovoi.dmitrii.dbtutorial.model.User;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class DBHelperV2 extends SQLiteOpenHelper {
     //table group
     private static final String TABLE_GROUP = "groups";
     private static final String KEY_GROUP_TITLE = "title";
+    private static final String[] COLUMNS_GROUP = new String[]{KEY_ID, KEY_GROUP_TITLE};
 
     //table credit_card
     private static final String TABLE_CREDIT_CARD = "credit_cards";
@@ -98,7 +100,6 @@ public class DBHelperV2 extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-//        init();
     }
 
     @Override
@@ -119,12 +120,13 @@ public class DBHelperV2 extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_GROUP);
         db.execSQL(CREATE_TABLE_CREDIT_CARD);
         db.execSQL(CREATE_TABLE_USER_GROUP_MAP);
-        User user = new User("user1", "user1", "123", true);
-        user = createUser(user);
-        createUser(new User("user2", "user2", "123", true));
+        User user1 = new User("user5", "user5", "123", true);
+        User user2 = new User("user2", "user2", "123", true);
+        user1 = createUser(user1);
+        user2 = createUser(user2);
         createUser(new User("user3", "user3", "123", true));
         createUser(new User("user4", "user4", "123", true));
-        createUser(new User("user5", "user5", "123", true));
+        createUser(new User("user1", "user1", "123", true));
         createUser(new User("user6", "user6", "123", false));
         createUser(new User("user7", "user7", "123", true));
         createUser(new User("user7", "user7", "123", true));
@@ -133,10 +135,16 @@ public class DBHelperV2 extends SQLiteOpenHelper {
         createUser(new User("user7", "user7", "123", true));
         createUser(new User("user7", "user7", "123", false));
 
-        createCreditCard(new CreditCard("1111-2222-3333-4444", "654", "12/18"), user.getId());
-        createCreditCard(new CreditCard("2111-2222-3333-4444", "754", "11/18"), user.getId());
-        createCreditCard(new CreditCard("3111-2222-3333-4444", "854", "10/18"), user.getId());
-        createCreditCard(new CreditCard("4111-2222-3333-4444", "954", "09/18"), user.getId());
+        createCreditCard(new CreditCard("1111-2222-3333-4444", "654", "12/18"), user1.getId());
+        createCreditCard(new CreditCard("2111-2222-3333-4444", "754", "11/18"), user1.getId());
+        createCreditCard(new CreditCard("3111-2222-3333-4444", "854", "10/18"), user1.getId());
+        createCreditCard(new CreditCard("4111-2222-3333-4444", "954", "09/18"), user1.getId());
+
+        Group group1 = createGroup(new Group("My group1"));
+        Group group2 = createGroup(new Group("My group2"));
+
+        addUserToGroup(user1.getId(), group2.getId());
+        addUserToGroup(user2.getId(), group2.getId());
     }
 
     public void closeDB() {
@@ -249,6 +257,18 @@ public class DBHelperV2 extends SQLiteOpenHelper {
         return entity;
     }
 
+    public CreditCard findCreditCardById(Long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_CREDIT_CARD,
+                COLUMNS_CREDIT_CARD, KEY_ID + "= ?", new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            return cursor2CreditCard(cursor);
+        } else {
+            return null;
+        }
+    }
+
     public CreditCard createCreditCard(CreditCard entity, Long userId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -275,4 +295,66 @@ public class DBHelperV2 extends SQLiteOpenHelper {
         }
         return entities;
     }
+    //==============================End CreditCard=========================//
+
+    //==============================Group=========================//
+    private Group cursor2Group(Cursor cursor) {
+        Group entity = new Group();
+        entity.setId(cursor.getLong(cursor.getColumnIndex(KEY_ID)));
+        entity.setTitle(cursor.getString(cursor.getColumnIndex(KEY_GROUP_TITLE)));
+        return entity;
+    }
+
+    public Group findGroupById(Long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_GROUP,
+                COLUMNS_GROUP, KEY_ID + "= ?", new String[]{String.valueOf(id)}, null, null, null, null);
+        if (cursor != null) {
+            cursor.moveToFirst();
+            return cursor2Group(cursor);
+        } else {
+            return null;
+        }
+    }
+
+    public Group createGroup(Group entity) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_GROUP_TITLE, entity.getTitle());
+        long id = db.insert(TABLE_GROUP, null, values);
+        entity.setId(id);
+        return entity;
+    }
+
+    public boolean addUserToGroup(Long userId, Long groupId) {
+        boolean result = false;
+//        TODO add checking
+        User user = findUserById(userId);
+        Group group = findGroupById(groupId);
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_USER_GROUP_USER_ID, userId);
+        values.put(KEY_USER_GROUP_GROUP_ID, groupId);
+        long id = db.insert(TABLE_USER_GROUP_MAP, null, values);
+        Log.i(TAG, "what is returns?: " + id);
+        return result;
+    }
+
+    public List<User> findAllUserForGroup(Long groupId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<User> entities = new ArrayList<>();
+        String query = String.format("SELECT u.* FROM %s u INNER JOIN %s ug ON u.%s=ug.%s INNER JOIN %s g ON ug.%s=g.%s WHERE g.%s=?",
+                TABLE_USER, TABLE_USER_GROUP_MAP, KEY_ID, KEY_USER_GROUP_USER_ID, TABLE_GROUP, KEY_USER_GROUP_GROUP_ID, KEY_ID, KEY_ID);
+        Log.d(TAG, query);
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(groupId)});
+        if (cursor.moveToFirst()) {
+            do {
+                entities.add(cursor2User(cursor));
+            } while (cursor.moveToNext());
+        }
+        return entities;
+    }
+    //==============================End Group=========================//
+
+
 }
