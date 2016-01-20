@@ -28,7 +28,7 @@ public class Util {
         } catch (NoSuchAlgorithmException e) {
             Log.e(TAG, e.getMessage());
         }
-        Log.d(TAG, encryptedPassword);
+//        Log.d(TAG, encryptedPassword);
         return encryptedPassword;
     }
 

@@ -19,16 +19,19 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         super(Application.class);
     }
 
-    private DBHelperV2 dbHelper;
+    private DBHelperV3 dbHelper;
     private static final String TAG = "<Test>";
+    int count = 500;
+    long startTime = 0;
+    long endTime = 0;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         RenamingDelegatingContext context = new RenamingDelegatingContext(getContext(), "test_");
-        dbHelper = new DBHelperV2(context);
+        dbHelper = new DBHelperV3(context);
         assertNotNull(dbHelper);
-        dbHelper.init();
+//        dbHelper.initDB(d);
     }
 
     @Override
@@ -37,32 +40,53 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         super.tearDown();
     }
 
-    public void testAddUser(){
-        User user = new User();
-        user.setLogin("login");
-        user.setPassword("123");
-        user.setName("MyName");
-        user.setIsAdmin(false);
-        Log.i("<TEST>", "user=" + user);
-        User user1 = dbHelper.createUser(user);
-        assertNotNull(user1.getId());
-        Log.i("<TEST>", "user1=" + user1);
+    public void testAddSimple() {
+        startTime = System.currentTimeMillis();
+        dbHelper.simpleInsert(count);
+        endTime = System.currentTimeMillis();
+        Log.i(TAG, "Total simple insert time: " + (endTime - startTime) + "ms");
     }
 
-    public void testGetCardsForUser(){
-        List<CreditCard> creditCards = dbHelper.findAllCreditCardsByUserId(1L);
-        assertEquals(4, creditCards.size());
+    public void testBulk() {
+        startTime = System.currentTimeMillis();
+        dbHelper.bulkInsertUsingCursor(count);
+        endTime = System.currentTimeMillis();
+        Log.i(TAG, "Total bulk insert time: " + (endTime - startTime) + "ms");
     }
 
-    public void testGetUserForCreditCard(){
-        User user = dbHelper.findUserForCreditCard(3L);
-        assertEquals("user1", user.getName());
+    public void testBulkWithStatement() {
+        startTime = System.currentTimeMillis();
+        dbHelper.bulkInsertUsingCursor(count);
+        endTime = System.currentTimeMillis();
+        Log.i(TAG, "Total bulk insert with statement time: " + (endTime - startTime) + "ms");
     }
 
-    public void testGetUserForGroup(){
-        List<User> users = dbHelper.findAllUserForGroup(2L);
-        assertEquals(2, users.size());
-        Log.i(TAG, String.valueOf(users.get(0)));
-        Log.i(TAG, String.valueOf(users.get(1)));
-    }
+//    public void testAddUser(){
+//        User user = new User();
+//        user.setLogin("login");
+//        user.setPassword("123");
+//        user.setName("MyName");
+//        user.setIsAdmin(false);
+//        Log.i("<TEST>", "user=" + user);
+//        User user1 = dbHelper.createUser(user);
+//        assertNotNull(user1.getId());
+//        Log.i("<TEST>", "user1=" + user1);
+//    }
+//
+//    public void testGetCardsForUser(){
+//        List<CreditCard> creditCards = dbHelper.findAllCreditCardsByUserId(1L);
+//        assertEquals(4, creditCards.size());
+//    }
+//
+//    public void testGetUserForCreditCard(){
+//        User user = dbHelper.findUserForCreditCard(3L);
+//        assertEquals("user1", user.getName());
+//    }
+//
+//    public void testGetUserForGroup(){
+//        List<User> users = dbHelper.findAllUserForGroup(2L);
+//        assertEquals(2, users.size());
+//        Log.i(TAG, String.valueOf(users.get(0)));
+//        Log.i(TAG, String.valueOf(users.get(1)));
+//    }
 }

@@ -2,6 +2,7 @@ package com.borovoi.dmitrii.dbtutorial;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,10 +16,12 @@ import java.util.List;
 
 public class MainActivityV1 extends AppCompatActivity {
 
+    private static final String TAG = "<MYAPP>";
     List<User> users;
     User currentUser;
     int selectedUserIndex = -1;
     DBHelperV1 dbHelperV1;
+    DBHelperV3 dbHelperV3;
     ArrayAdapter<User> adapterUsers;
 
     @Override
@@ -27,13 +30,24 @@ public class MainActivityV1 extends AppCompatActivity {
         setContentView(R.layout.activity_main_v1);
         ListView listView = (ListView) findViewById(R.id.listView);
 
-        dbHelperV1 = new DBHelperV1(this);
-        dbHelperV1.init();
-        users = dbHelperV1.findAllUsers();
+//        dbHelperV1 = new DBHelperV1(this);
+//        dbHelperV1.init();
+//        users = dbHelperV1.findAllUsers();
+//
+//        adapterUsers = new ArrayAdapter<User>(this, android.R.layout.simple_list_item_1, users);
+//        listView.setAdapter(adapterUsers);
+//        listView.setOnItemClickListener(itemClickListener);
 
-        adapterUsers = new ArrayAdapter<User>(this, android.R.layout.simple_list_item_1, users);
-        listView.setAdapter(adapterUsers);
-        listView.setOnItemClickListener(itemClickListener);
+        boolean deleted = DBHelperV3.deleteDB(this);
+        Log.i(TAG, "deleted: " + deleted);
+        boolean created = DBHelperV3.initialize(this);
+        Log.i(TAG, "created: " + created);
+        dbHelperV3 = new DBHelperV3(this);
+        long insert = dbHelperV3.insert();
+        Log.i(TAG, "inserted with id: " + insert);
+        String s = dbHelperV3.get();
+        Log.i(TAG, "content: " + s);
+
     }
 
     AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
